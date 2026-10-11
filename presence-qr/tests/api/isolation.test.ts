@@ -283,6 +283,49 @@ describe("surface d'API", () => {
   });
 });
 
+describe("pointage étudiant : fonctions réservées au serveur", () => {
+  const args = { p_session_id: "", p_source: "qr", p_matricule: "20260001", p_ip_hash: "x", p_device_ref: "y" };
+
+  it("record_checkin refusé avec la clé publique (anonyme)", async () => {
+    const { error } = await newClient().rpc("record_checkin", { ...args, p_session_id: sessionA });
+    expect(error).not.toBeNull();
+  });
+
+  it("record_checkin refusé à un utilisateur connecté (même l'enseignante)", async () => {
+    const { error } = await alice.client.rpc("record_checkin", { ...args, p_session_id: sessionA });
+    expect(error).not.toBeNull();
+    const check = await alice.client.from("attendance").select("id").eq("session_id", sessionA);
+    expect(check.data).toEqual([]);
+  });
+
+  it("validate_scan refusé avec la clé publique", async () => {
+    const { error } = await newClient().rpc("validate_scan", {
+      p_public_code: "AAAAAAAAAAAA",
+      p_token: "x",
+      p_fallback_code: "123456",
+      p_ip_hash: "x",
+      p_device_ref: "y",
+    });
+    expect(error).not.toBeNull();
+  });
+
+  it("l'admin de B ne peut ni ouvrir, ni obtenir de QR, ni clôturer une séance de A", async () => {
+    expect((await bob.client.rpc("open_session", { p_session_id: sessionA, p_minutes: 15 })).error?.code).toBe("42501");
+    expect((await bob.client.rpc("rotate_session_token", { p_session_id: sessionA })).error?.code).toBe("42501");
+    expect((await bob.client.rpc("close_session", { p_session_id: sessionA })).error?.code).toBe("42501");
+    expect(
+      (
+        await bob.client.rpc("set_attendance", {
+          p_session_id: sessionA,
+          p_student_id: studentA,
+          p_status: "present",
+          p_reason: "Tentative croisée",
+        })
+      ).error?.code,
+    ).toBe("42501");
+  });
+});
+
 describe("enseignant ajouté à A par l'admin", () => {
   it("ne voit rien avant d'être ajouté", async () => {
     const { data } = await carol.client.from("institutions").select("id");

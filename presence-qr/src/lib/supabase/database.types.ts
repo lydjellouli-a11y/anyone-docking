@@ -670,9 +670,56 @@ export type Database = {
     };
     Functions: {
       cancel_session: { Args: { p_session_id: string }; Returns: undefined };
+      close_session: { Args: { p_session_id: string }; Returns: Json };
       create_workspace: { Args: { p_name: string }; Returns: string };
+      extend_checkin: {
+        Args: { p_minutes?: number; p_session_id: string };
+        Returns: string;
+      };
       import_students: {
         Args: { p_group_id: string; p_rows: Json };
+        Returns: Json;
+      };
+      open_session: {
+        Args: { p_minutes?: number; p_session_id: string };
+        Returns: undefined;
+      };
+      record_checkin: {
+        Args: {
+          p_device_ref: string;
+          p_ip_hash: string;
+          p_matricule: string;
+          p_session_id: string;
+          p_source: string;
+        };
+        Returns: Json;
+      };
+      rotate_session_token: {
+        Args: { p_session_id: string };
+        Returns: {
+          checkin_closes_at: string;
+          expires_at: string;
+          server_now: string;
+          token: string;
+        }[];
+      };
+      set_attendance: {
+        Args: {
+          p_reason: string;
+          p_session_id: string;
+          p_status: string;
+          p_student_id: string;
+        };
+        Returns: undefined;
+      };
+      validate_scan: {
+        Args: {
+          p_device_ref: string;
+          p_fallback_code: string;
+          p_ip_hash: string;
+          p_public_code: string;
+          p_token: string;
+        };
         Returns: Json;
       };
     };

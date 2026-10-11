@@ -12,7 +12,7 @@ Plateforme de gestion de l'assiduité universitaire par QR code
 | 2 | Initialisation du projet + migrations SQL | ✅ testée localement |
 | 3 | Authentification et isolation des données | ✅ testée sur Supabase local — [détails](docs/phase-3-authentification.md) |
 | 4 | Import, groupes, séances | ✅ testée sur Supabase local — [détails](docs/phase-4-organisation-import-seances.md) |
-| 5 | QR code et validation de présence | à faire |
+| 5 | QR code et validation de présence | ✅ testée sur Supabase local — [détails](docs/phase-5-qr-pointage.md) |
 | 6 | Exports et tableau de bord | à faire |
 | 7 | Tests, limites, déploiement | à faire |
 
@@ -59,7 +59,7 @@ La clé secrète Supabase ne doit **jamais** être préfixée par `NEXT_PUBLIC_`
 
 ## Tests de la base : ce qu'ils prouvent, et ce qu'ils ne prouvent pas
 
-`npm run test:db` exécute aujourd'hui 143 tests, dont :
+`npm run test:db` exécute aujourd'hui 200 tests, dont :
 - RLS activée sur toutes les tables, aucun droit pour les visiteurs anonymes ;
 - contraintes (doublons de présence, matricule, clés étrangères composites
   empêchant de mélanger deux établissements) ;

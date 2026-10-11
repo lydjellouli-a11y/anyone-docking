@@ -9,6 +9,7 @@ import { formatDateTime } from "@/lib/dates";
 import { SESSION_STATUS_LABELS, SESSION_TYPE_LABELS } from "@/lib/labels";
 import { WEEKDAYS } from "@/lib/schedule";
 import { cancelSession, planSession, planWeeklySessions } from "../../actions";
+import { startSessionNow } from "../../seances/actions";
 
 export const metadata: Metadata = { title: "Séances — Présence QR" };
 
@@ -69,7 +70,9 @@ export default async function AssignmentPage({
             <tbody>
               {sessions.map((s) => (
                 <tr key={s.id} className={s.status === "cancelled" ? "muted" : undefined}>
-                  <td>{formatDateTime(s.scheduled_at)}</td>
+                  <td>
+                    <Link href={`/espace/${institution.id}/seances/${s.id}`}>{formatDateTime(s.scheduled_at)}</Link>
+                  </td>
                   <td>{s.room ?? "—"}</td>
                   <td>{SESSION_STATUS_LABELS[s.status]}</td>
                   <td>
@@ -92,8 +95,15 @@ export default async function AssignmentPage({
       ) : (
         <p className="muted">Aucune séance planifiée.</p>
       )}
-      <p className="muted">
-        L&apos;ouverture d&apos;une séance avec QR code arrive en phase 5.
+      {isOwner && (
+        <ActionForm
+          action={startSessionNow.bind(null, institution.id, assignment.id)}
+          submitLabel="Démarrer une séance maintenant"
+          pendingLabel="Ouverture…"
+        />
+      )}
+      <p className="muted small">
+        Pour ouvrir une séance planifiée et afficher son QR code, cliquez sur sa date.
       </p>
 
       {isOwner && (
