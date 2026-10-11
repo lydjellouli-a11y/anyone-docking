@@ -55,6 +55,12 @@ export default async function AssignmentPage({
         {semester ? ` — ${semester.label}` : ""}
       </p>
 
+      <p>
+        <Link href={`/espace/${institution.id}/enseignements/${assignment.id}/historique`}>
+          Historique cumulé et export Excel →
+        </Link>
+      </p>
+
       <h2>Séances</h2>
       {sessions?.length ? (
         <div className="table-wrap">

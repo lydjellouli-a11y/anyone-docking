@@ -58,15 +58,20 @@ Aucun fichier existant de votre dépôt n'est modifié.
 2. Cliquez sur **« Add New… » → « Project »**, puis **« Import »** à côté de
    `anyone-docking`. Si le dépôt n'apparaît pas, autorisez Vercel à y
    accéder (lien « Adjust GitHub App Permissions »).
-3. **Root Directory** : cliquez sur « Edit » et choisissez **`presence-qr`**.
-   Le framework « Next.js » est alors détecté automatiquement.
+3. Vercel peut afficher la liste des applications du dépôt : sur la ligne
+   **presence-qr (Next.js)**, cliquez sur **« Import single project »**.
+   N'utilisez **pas** l'import « multi-service » (adresse contenant
+   `framework=services`) : il provoque une erreur. Vérifiez ensuite que
+   **Root Directory** = **`presence-qr`** et **Framework** = **Next.js**.
+   Si le dossier n'apparaît pas, c'est que l'étape 1 (fusion) n'est pas
+   faite ; une fois la fusion faite, rechargez la page.
 4. Ouvrez **« Environment Variables »** et ajoutez ces **3 variables**. Les
    valeurs se trouvent dans Supabase : bouton **« Connect »** en haut de la
    page du projet, ou **Project Settings → API Keys** et **Data API**.
 
    | Nom (à recopier exactement) | Valeur à copier depuis Supabase |
    |---|---|
-   | `NEXT_PUBLIC_SUPABASE_URL` | Project URL (`https://xxxx.supabase.co`) |
+   | `NEXT_PUBLIC_SUPABASE_URL` | Project URL (`https://xxxx.supabase.co`), **seulement l'adresse** |
    | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Publishable key (commence par `sb_publishable_`) |
    | `SUPABASE_SECRET_KEY` | Secret key (commence par `sb_secret_`, bouton « Reveal ») |
 
@@ -76,6 +81,13 @@ Aucun fichier existant de votre dépôt n'est modifié.
 6. Notez l'adresse du site, par exemple `https://anyone-docking-xxxx.vercel.app`.
    Vous pouvez la renommer plus tard (Settings → Domains), par exemple en
    `presence-xxx.vercel.app`.
+
+Astuce : la fenêtre « Connect » de Supabase affiche un bloc `.env.local` ;
+ne suivez pas ses autres instructions (installation de paquets, fichiers),
+déjà réalisées dans le code.
+
+**Mises à jour ultérieures** : chaque fusion d'une Pull Request dans `main`
+redéploie automatiquement le site (1 à 3 minutes).
 
 ## Étape 5 — Indiquer l'adresse du site à Supabase
 

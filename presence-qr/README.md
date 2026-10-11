@@ -13,7 +13,7 @@ Plateforme de gestion de l'assiduité universitaire par QR code
 | 3 | Authentification et isolation des données | ✅ testée sur Supabase local — [détails](docs/phase-3-authentification.md) |
 | 4 | Import, groupes, séances | ✅ testée sur Supabase local — [détails](docs/phase-4-organisation-import-seances.md) |
 | 5 | QR code et validation de présence | ✅ testée sur Supabase local — [détails](docs/phase-5-qr-pointage.md) |
-| 6 | Exports et tableau de bord | à faire |
+| 6 | Exports et tableau de bord | ✅ testée sur Supabase local — [détails](docs/phase-6-historique-exports.md) |
 | 7 | Tests, limites, déploiement | à faire |
 
 **Mise en ligne (version d'essai)** : suivre [docs/mise-en-ligne.md](docs/mise-en-ligne.md).
