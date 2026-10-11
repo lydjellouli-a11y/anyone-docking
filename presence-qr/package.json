@@ -13,7 +13,8 @@
     "gen:types": "supabase gen types typescript --local --schema public > src/lib/supabase/database.types.ts && prettier --write src/lib/supabase/database.types.ts",
     "test:api": "./scripts/test-api.sh",
     "test:e2e": "playwright test",
-    "check:secrets": "./scripts/check-bundle-secrets.sh"
+    "check:secrets": "./scripts/check-bundle-secrets.sh",
+    "build:deploy-sql": "./scripts/build-deploy-sql.sh"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

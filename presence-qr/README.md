@@ -16,8 +16,8 @@ Plateforme de gestion de l'assiduité universitaire par QR code
 | 6 | Exports et tableau de bord | à faire |
 | 7 | Tests, limites, déploiement | à faire |
 
-Rien n'est déployé. Aucun compte Supabase ou Vercel n'est encore nécessaire :
-le développement se fait avec Supabase en local (Docker).
+**Mise en ligne (version d'essai)** : suivre [docs/mise-en-ligne.md](docs/mise-en-ligne.md).
+Le développement et les tests se font avec Supabase en local (Docker).
 
 ## Organisation des fichiers
 
