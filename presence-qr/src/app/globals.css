@@ -295,3 +295,39 @@ fieldset {
     border: 1px solid #000;
   }
 }
+
+.row-actions.left {
+  justify-content: flex-start;
+}
+
+.button-link {
+  display: inline-block;
+  padding: 10px 16px;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--bg);
+  text-decoration: none;
+}
+
+.button-link.secondary {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.history-table td.cell {
+  text-align: center;
+  font-weight: 600;
+}
+
+.history-table td.cell.absent {
+  color: #b00020;
+}
+
+.history-table td.cell.excuse {
+  color: var(--muted);
+}
+
+.history-table tr.over-threshold td {
+  background: color-mix(in srgb, #b00020 12%, transparent);
+}

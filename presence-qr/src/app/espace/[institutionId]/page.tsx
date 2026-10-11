@@ -4,6 +4,8 @@ import { getInstitutionContext } from "@/lib/institution";
 import { formatDateTime } from "@/lib/dates";
 import { roleLabel } from "@/lib/roles";
 import { SESSION_TYPE_LABELS } from "@/lib/labels";
+import { ABSENCE_THRESHOLD, formatPercent } from "@/lib/history/core";
+import { loadAssignmentHistory } from "@/lib/history/load";
 
 export const metadata: Metadata = { title: "Tableau de bord — Présence QR" };
 
@@ -30,6 +32,13 @@ export default async function InstitutionPage({ params }: PageProps<"/espace/[in
     if (!nextByAssignment.has(s.assignment_id)) nextByAssignment.set(s.assignment_id, s.scheduled_at);
   }
 
+  // Indicateurs par enseignement (séances clôturées, présence, seuil).
+  const stats = new Map(
+    await Promise.all(
+      (assignments ?? []).map(async (a) => [a.id, (await loadAssignmentHistory(supabase, institution.id, a.id))?.history] as const),
+    ),
+  );
+
   return (
     <main>
       <h1>{institution.name}</h1>
@@ -48,6 +57,22 @@ export default async function InstitutionPage({ params }: PageProps<"/espace/[in
                 <div className="muted">
                   {next ? `Prochaine séance : ${formatDateTime(next)}` : "Aucune séance planifiée"}
                 </div>
+                {(() => {
+                  const h = stats.get(a.id);
+                  if (!h || h.sessions.length === 0) return null;
+                  return (
+                    <div className="small">
+                      {h.sessions.length} séance(s) clôturée(s) — présence {formatPercent(h.presenceRate)}
+                      {h.overThresholdCount > 0 && (
+                        <span className="danger">
+                          {" "}
+                          — ⚠ {h.overThresholdCount} étudiant(s) à {ABSENCE_THRESHOLD} absences ou plus
+                        </span>
+                      )}{" "}
+                      — <Link href={`/espace/${institution.id}/enseignements/${a.id}/historique`}>historique</Link>
+                    </div>
+                  );
+                })()}
               </li>
             );
           })}
