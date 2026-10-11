@@ -1,27 +1,6 @@
 // Parcours enseignant dans un vrai navigateur. Données 100 % fictives.
-import { randomUUID } from "node:crypto";
-import { expect, test, type Page } from "@playwright/test";
-
-const PASSWORD = "Fictif2026Test";
-
-async function signUp(page: Page, name: string) {
-  const email = `${name.toLowerCase()}.${randomUUID().slice(0, 8)}@exemple.test`;
-  await page.goto("/inscription");
-  await page.getByLabel("Nom complet").fill(`${name} Fictif`);
-  await page.getByLabel("Adresse e-mail").fill(email);
-  await page.getByLabel("Mot de passe", { exact: true }).fill(PASSWORD);
-  await page.getByLabel("Confirmer le mot de passe").fill(PASSWORD);
-  await page.getByRole("button", { name: "Créer mon compte" }).click();
-  await expect(page).toHaveURL(/\/espace$/);
-  return email;
-}
-
-async function createWorkspace(page: Page, name: string): Promise<string> {
-  await page.getByLabel(/Nom de l'espace/).fill(name);
-  await page.getByRole("button", { name: "Créer l'espace de travail" }).click();
-  await expect(page.getByRole("heading", { name })).toBeVisible();
-  return page.url().split("/espace/")[1];
-}
+import { expect, test } from "@playwright/test";
+import { PASSWORD, createWorkspace, signUp } from "./helpers/account";
 
 test("sans session, l'espace enseignant redirige vers la connexion", async ({ page }) => {
   await page.goto("/espace");

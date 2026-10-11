@@ -37,6 +37,8 @@ let instA: string;
 let instB: string;
 let studentA: string;
 let assignmentA: string;
+let groupA: string;
+let sessionA: string;
 
 beforeAll(async () => {
   if (!API_URL || !PUBLISHABLE_KEY) {
@@ -80,6 +82,7 @@ beforeAll(async () => {
     .single();
   expect(stu.error).toBeNull();
   studentA = stu.data!.id;
+  groupA = grp.data!.id;
   await alice.client
     .from("group_students")
     .insert({ institution_id: instA, group_id: grp.data!.id, student_id: studentA })
@@ -97,10 +100,13 @@ beforeAll(async () => {
     .single();
   expect(ta.error).toBeNull();
   assignmentA = ta.data!.id;
-  await alice.client
+  const sess = await alice.client
     .from("class_sessions")
     .insert({ institution_id: instA, assignment_id: assignmentA, scheduled_at: new Date().toISOString() })
-    .throwOnError();
+    .select("id")
+    .single();
+  expect(sess.error).toBeNull();
+  sessionA = sess.data!.id;
 
   // bob crée un étudiant dans B.
   await bob.client
@@ -129,6 +135,14 @@ describe("visiteur anonyme (clé publique seule)", () => {
       source: "qr",
     });
     expect(error?.code).toBe("42501");
+  });
+
+  it("import_students refusé", async () => {
+    const { error } = await anon().rpc("import_students", {
+      p_group_id: groupA,
+      p_rows: [{ matricule: "ANON0001", nom: "Anonyme", prenom: "Test" }],
+    });
+    expect(error).not.toBeNull();
   });
 
   it("create_workspace refusé", async () => {
@@ -194,6 +208,21 @@ describe("admin de B contre l'établissement A (accès croisé)", () => {
       .from("class_sessions")
       .insert({ institution_id: instA, assignment_id: assignmentA, scheduled_at: new Date().toISOString() });
     expect(error?.code).toBe("42501");
+  });
+
+  it("ne peut pas importer d'étudiants dans un groupe de A (import_students)", async () => {
+    const { error } = await bob.client.rpc("import_students", {
+      p_group_id: groupA,
+      p_rows: [{ matricule: fictiveMatricule("P"), nom: "Pirate", prenom: "Test" }],
+    });
+    expect(error?.code).toBe("42501");
+  });
+
+  it("ne peut pas annuler une séance de A (cancel_session)", async () => {
+    const { error } = await bob.client.rpc("cancel_session", { p_session_id: sessionA });
+    expect(error?.code).toBe("42501");
+    const check = await alice.client.from("class_sessions").select("status").eq("id", sessionA).single();
+    expect(check.data?.status).toBe("planned");
   });
 
   it("ne voit rien de A via l'API GraphQL", async () => {

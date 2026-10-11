@@ -135,3 +135,82 @@ button:disabled {
   border: 1px solid var(--muted);
   border-radius: 8px;
 }
+
+.breadcrumb {
+  margin: 0 0 8px;
+}
+
+.subnav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--muted);
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0 16px;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1px solid color-mix(in srgb, var(--muted) 40%, transparent);
+}
+
+.inline-form {
+  display: inline;
+}
+
+.inline-form .form-error {
+  display: block;
+}
+
+.danger {
+  color: #b00020;
+}
+
+.danger-button {
+  background: #b00020;
+}
+
+details.card {
+  margin: 16px 0;
+}
+
+details summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+fieldset {
+  border: 1px solid var(--muted);
+  border-radius: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+.form label.inline {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  font-weight: 400;
+}
+
+.form select {
+  font: inherit;
+  padding: 10px 12px;
+  border: 1px solid var(--muted);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--fg);
+}

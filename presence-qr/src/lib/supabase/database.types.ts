@@ -297,8 +297,10 @@ export type Database = {
           department_id: string | null;
           id: string;
           institution_id: string;
+          kind: string;
           level: string | null;
           name: string;
+          parent_id: string | null;
           semester_id: string;
         };
         ComputedFields: never;
@@ -307,8 +309,10 @@ export type Database = {
           department_id?: string | null;
           id?: string;
           institution_id: string;
+          kind?: string;
           level?: string | null;
           name: string;
+          parent_id?: string | null;
           semester_id: string;
         };
         Update: {
@@ -316,8 +320,10 @@ export type Database = {
           department_id?: string | null;
           id?: string;
           institution_id?: string;
+          kind?: string;
           level?: string | null;
           name?: string;
+          parent_id?: string | null;
           semester_id?: string;
         };
         Relationships: [
@@ -340,6 +346,13 @@ export type Database = {
             columns: ["institution_id", "semester_id"];
             isOneToOne: false;
             referencedRelation: "semesters";
+            referencedColumns: ["institution_id", "id"];
+          },
+          {
+            foreignKeyName: "groups_parent_fk";
+            columns: ["institution_id", "parent_id"];
+            isOneToOne: false;
+            referencedRelation: "groups";
             referencedColumns: ["institution_id", "id"];
           },
         ];
@@ -656,7 +669,12 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      cancel_session: { Args: { p_session_id: string }; Returns: undefined };
       create_workspace: { Args: { p_name: string }; Returns: string };
+      import_students: {
+        Args: { p_group_id: string; p_rows: Json };
+        Returns: Json;
+      };
     };
     Enums: {
       [_ in never]: never;
