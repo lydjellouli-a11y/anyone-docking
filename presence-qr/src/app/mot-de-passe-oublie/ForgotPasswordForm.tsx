@@ -41,8 +41,10 @@ export function ForgotPasswordForm() {
     }
   }
 
+  // method="post" : si la page n'est pas encore chargée (réseau lent), un envoi
+  // « classique » du formulaire ne met jamais le mot de passe dans l'adresse.
   return (
-    <form onSubmit={onSubmit} className="form" noValidate>
+    <form onSubmit={onSubmit} className="form" method="post" noValidate>
       <label>
         Adresse e-mail
         <input name="email" type="email" autoComplete="email" required />

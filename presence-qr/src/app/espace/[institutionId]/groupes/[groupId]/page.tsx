@@ -6,7 +6,7 @@ import { ActionForm } from "@/components/ActionForm";
 import { Collapsible } from "@/components/Collapsible";
 import { getInstitutionContext } from "@/lib/institution";
 import { fetchRoster } from "@/lib/roster";
-import { deleteGroup, removeStudentFromGroup } from "../../actions";
+import { deleteGroup, removeStudentFromGroup, renameStudent } from "../../actions";
 import { ImportStudents } from "./ImportStudents";
 
 export const metadata: Metadata = { title: "Liste du groupe — Présence QR" };
@@ -72,7 +72,9 @@ export default async function GroupPage({ params }: PageProps<"/espace/[institut
         </p>
       )}
 
-      {canImport && <ImportStudents groupId={group.id} groupName={group.name} />}
+      {canImport && (
+        <ImportStudents groupId={group.id} groupName={group.name} institutionId={institution.id} canEditNames={isAdmin} />
+      )}
 
       <h2>Liste des étudiants ({roster.length})</h2>
       {roster.length === 0 ? (
@@ -98,6 +100,13 @@ export default async function GroupPage({ params }: PageProps<"/espace/[institut
                   {kids.length > 0 && <td>{s.group_id === group.id ? "—" : groupNames.get(s.group_id)}</td>}
                   {isAdmin && (
                     <td>
+                      <details>
+                        <summary className="small">Modifier</summary>
+                        <ActionForm action={renameStudent.bind(null, s.id)} submitLabel="Enregistrer" className="form compact">
+                          <input name="last_name" defaultValue={s.last_name} required maxLength={100} aria-label="Nom" />
+                          <input name="first_name" defaultValue={s.first_name} required maxLength={100} aria-label="Prénom" />
+                        </ActionForm>
+                      </details>
                       <ActionForm
                         action={removeStudentFromGroup.bind(null, s.group_id, s.id)}
                         submitLabel="Retirer"

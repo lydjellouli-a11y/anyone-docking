@@ -6,6 +6,7 @@ export const PASSWORD = "Fictif2026Test";
 export async function signUp(page: Page, name: string) {
   const email = `${name.toLowerCase()}.${randomUUID().slice(0, 8)}@exemple.test`;
   await page.goto("/inscription");
+  await page.waitForLoadState("networkidle"); // page entièrement chargée avant de remplir
   await page.getByLabel("Nom complet").fill(`${name} Fictif`);
   await page.getByLabel("Adresse e-mail").fill(email);
   await page.getByLabel("Mot de passe", { exact: true }).fill(PASSWORD);
