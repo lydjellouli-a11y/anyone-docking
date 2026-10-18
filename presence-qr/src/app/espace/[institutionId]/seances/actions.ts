@@ -115,3 +115,22 @@ export async function setAttendance(
   refresh();
   return { success: "Enregistré." };
 }
+
+const discardSchema = z.object({
+  reason: z.string().trim().min(3, "Justification obligatoire (3 caractères minimum).").max(500),
+});
+
+/**
+ * Annule une séance déjà ouverte ou clôturée (essai, erreur). Elle ne compte
+ * plus dans l'historique ni les exports ; les présences restent tracées.
+ */
+export async function discardSession(sessionId: string, _: FormState, fd: FormData): Promise<FormState> {
+  const parsed = discardSchema.safeParse({ reason: fd.get("reason") ?? "" });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Données invalides." };
+  if (!uuid.safeParse(sessionId).success) return { error: "Identifiant invalide." };
+  const { supabase } = await requireUser();
+  const { error } = await supabase.rpc("discard_session", { p_session_id: sessionId, p_reason: parsed.data.reason });
+  if (error) return { error: dbErrorMessage(error) };
+  refresh();
+  return {};
+}
