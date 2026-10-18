@@ -59,6 +59,13 @@ export default async function SessionPage({ params }: PageProps<"/espace/[instit
         {session.room ? ` — salle ${session.room}` : ""} — {SESSION_STATUS_LABELS[session.status]}
       </p>
 
+      {session.status === "planned" && (
+        <p>
+          <Link href={`/espace/${institution.id}/seances/${session.id}/feuille`}>
+            Feuille d&apos;émargement de cette séance (à imprimer à l&apos;avance)
+          </Link>
+        </p>
+      )}
       {session.status === "planned" && isOwner && (
         <div className="card">
           <p>Ouvrir la séance affiche le QR code ; les étudiants ont 15 minutes pour pointer (prolongeable).</p>
