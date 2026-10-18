@@ -70,6 +70,7 @@ export default async function AssignmentPage({
                 <th>Date et heure</th>
                 <th>Salle</th>
                 <th>État</th>
+                <th>Émargement</th>
                 <th />
               </tr>
             </thead>
@@ -81,6 +82,11 @@ export default async function AssignmentPage({
                   </td>
                   <td>{s.room ?? "—"}</td>
                   <td>{SESSION_STATUS_LABELS[s.status]}</td>
+                  <td>
+                    {s.status !== "cancelled" && (
+                      <Link href={`/espace/${institution.id}/seances/${s.id}/feuille`}>Feuille</Link>
+                    )}
+                  </td>
                   <td>
                     {isOwner && s.status === "planned" && (
                       <ActionForm

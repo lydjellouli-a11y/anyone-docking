@@ -24,12 +24,22 @@ export default async function SheetPage({ params }: PageProps<"/espace/[institut
     .maybeSingle();
   if (!session?.assignment) notFound();
 
-  const { data: children } = await supabase.from("groups").select("id").eq("parent_id", session.assignment.group_id);
-  const roster = await fetchRoster(supabase, [session.assignment.group_id, ...(children ?? []).map((c) => c.id)]);
+  const { data: children } = await supabase.from("groups").select("id, name").eq("parent_id", session.assignment.group_id);
+  const groupNames = new Map<string, string>([
+    [session.assignment.group_id, session.assignment.group?.name ?? ""],
+    ...(children ?? []).map((c) => [c.id, c.name] as [string, string]),
+  ]);
+  const fullRoster = await fetchRoster(supabase, [...groupNames.keys()]);
+  // Un étudiant inscrit à la fois dans la section et dans un groupe n'apparaît qu'une fois.
+  const roster = [...new Map(fullRoster.map((s) => [s.id, s])).values()];
+  const showGroup = groupNames.size > 1;
 
   return (
     <main className="sheet">
-      <PrintButton />
+      <div className="no-print row-actions left">
+        <PrintButton />
+        <span className="muted small">{roster.length} étudiant(s)</span>
+      </div>
       <h1>Feuille d&apos;émargement</h1>
       <p>
         {institution.name} — {session.assignment.module?.name} ({SESSION_TYPE_LABELS[session.assignment.session_type]}) —{" "}
@@ -45,6 +55,7 @@ export default async function SheetPage({ params }: PageProps<"/espace/[institut
             <th>Matricule</th>
             <th>Nom</th>
             <th>Prénom</th>
+            {showGroup && <th>Groupe</th>}
             <th>Signature</th>
           </tr>
         </thead>
@@ -55,12 +66,13 @@ export default async function SheetPage({ params }: PageProps<"/espace/[institut
               <td>{s.matricule}</td>
               <td>{s.last_name}</td>
               <td>{s.first_name}</td>
+              {showGroup && <td>{groupNames.get(s.group_id) ?? ""}</td>}
               <td className="signature" />
             </tr>
           ))}
         </tbody>
       </table>
-      <p className="small">Signature de l&apos;enseignant(e) :</p>
+      <p className="small">Nombre de présents : ________ — Signature de l&apos;enseignant(e) :</p>
     </main>
   );
 }
