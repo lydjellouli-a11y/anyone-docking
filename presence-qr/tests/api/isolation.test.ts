@@ -345,6 +345,17 @@ describe("enseignant ajouté à A par l'admin", () => {
     expect(students.data).toEqual([]);
   });
 
+  it("ne peut pas modifier le nom d'un étudiant (réservé à l'admin)", async () => {
+    const { data } = await carol.client
+      .from("students")
+      .update({ last_name: "Modifié" })
+      .eq("id", studentA)
+      .select("id");
+    expect(data ?? []).toEqual([]);
+    const check = await alice.client.from("students").select("last_name").eq("id", studentA).single();
+    expect(check.data?.last_name).toBe("Fictif");
+  });
+
   it("ne peut pas se promouvoir admin", async () => {
     const { error } = await carol.client
       .from("memberships")

@@ -201,6 +201,51 @@ export async function confirmImport(groupId: string, rows: unknown): Promise<Imp
   return data as ImportSummary;
 }
 
+/**
+ * Corrige les noms d'étudiants DÉJÀ enregistrés avec ceux d'un fichier
+ * importé (cas des « noms différents » signalés à l'import).
+ * Réservé à l'admin : pour un autre compte, la RLS ne modifie aucune ligne.
+ */
+export async function applyFileNames(institutionId: string, rows: unknown): Promise<{ error?: string; updated?: number }> {
+  const parsedRows = importRowsSchema.safeParse(rows);
+  if (!uuid.safeParse(institutionId).success || !parsedRows.success) {
+    return { error: "Liste invalide : relancez l'import." };
+  }
+  const { supabase } = await requireUser();
+  let updated = 0;
+  for (const r of parsedRows.data) {
+    const { data, error } = await supabase
+      .from("students")
+      .update({ last_name: r.nom.trim(), first_name: r.prenom.trim() })
+      .eq("institution_id", institutionId)
+      .eq("matricule", r.matricule)
+      .select("id");
+    if (error) return { error: dbErrorMessage(error), updated };
+    updated += data?.length ?? 0;
+  }
+  if (updated === 0) return { error: "Action non autorisée : seule l'administratrice peut corriger les noms." };
+  refresh();
+  return { updated };
+}
+
+const studentNameSchema = z.object({
+  last_name: text(1, 100, "Nom"),
+  first_name: text(1, 100, "Prénom"),
+});
+
+/** Correction manuelle du nom d'un étudiant (admin ; journalisée par l'audit). */
+export async function renameStudent(studentId: string, _: FormState, fd: FormData): Promise<FormState> {
+  const parsed = studentNameSchema.safeParse({ last_name: fd.get("last_name"), first_name: fd.get("first_name") });
+  if (!parsed.success) return invalid(parsed.error);
+  if (!uuid.safeParse(studentId).success) return { error: "Identifiant invalide." };
+  const { supabase } = await requireUser();
+  const { data, error } = await supabase.from("students").update(parsed.data).eq("id", studentId).select("id");
+  if (error) return { error: dbErrorMessage(error) };
+  if (!data?.length) return { error: "Action non autorisée : seule l'administratrice peut corriger les noms." };
+  refresh();
+  return { success: "Nom corrigé." };
+}
+
 // -----------------------------------------------------------------------------
 // Enseignements (affectations) — admin
 // -----------------------------------------------------------------------------

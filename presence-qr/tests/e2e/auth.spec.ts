@@ -120,3 +120,18 @@ test("un lien de confirmation falsifié est refusé", async ({ page }) => {
   await expect(page).toHaveURL(/\/connexion\?erreur=lien$/);
   await expect(page.locator("p[role=alert]")).toContainText("lien est invalide");
 });
+
+test("page pas encore chargée (sans JavaScript) : le mot de passe ne part jamais dans l'adresse", async ({ browser }) => {
+  const ctx = await browser.newContext({ javaScriptEnabled: false });
+  const page = await ctx.newPage();
+  for (const path of ["/connexion", "/inscription"]) {
+    await page.goto(path);
+    await page.getByLabel("Adresse e-mail").fill("fictif@exemple.test");
+    await page.getByLabel("Mot de passe", { exact: true }).fill("SecretFictif2026");
+    await page.getByRole("button", { name: /Se connecter|Créer mon compte/ }).click();
+    await page.waitForLoadState();
+    expect(page.url()).not.toContain("SecretFictif2026");
+    expect(page.url()).not.toContain("password");
+  }
+  await ctx.close();
+});

@@ -61,8 +61,10 @@ export function SignupForm() {
     }
   }
 
+  // method="post" : si la page n'est pas encore chargée (réseau lent), un envoi
+  // « classique » du formulaire ne met jamais le mot de passe dans l'adresse.
   return (
-    <form onSubmit={onSubmit} className="form" noValidate>
+    <form onSubmit={onSubmit} className="form" method="post" noValidate>
       <label>
         Nom complet
         <input name="fullName" autoComplete="name" required maxLength={100} />

@@ -45,8 +45,10 @@ Exemple (fictif) correspondant à votre cas :
      nom manquant, doublon dans le fichier).
 3. **Importer** (seulement s'il n'y a aucune erreur) : **tout ou rien**, via la
    fonction SQL `import_students`.
-   - un matricule déjà connu n'est pas recréé, et son nom **n'est pas écrasé** :
-     la différence est signalée pour vérification ;
+   - un matricule déjà connu n'est pas recréé, et son nom **n'est pas écrasé**
+     automatiquement : la différence est signalée. L'admin peut alors cliquer
+     sur **« Remplacer par les noms du fichier »** pour appliquer les noms du
+     fichier ;
    - réimporter le même fichier ne crée aucun doublon.
 
 ## 4. Sécurité ajoutée
@@ -88,8 +90,10 @@ vérifie maintenant que le message est **visible**.
   téléphone ou du navigateur. Ils s'affichent dans le format de la langue de
   l'appareil (JJ/MM/AAAA sur un appareil en français, MM/JJ/AAAA en anglais).
   Toutes les dates **affichées** par l'application sont en JJ/MM/AAAA.
-- Pas encore de modification (renommer un groupe, déplacer un étudiant d'un
-  groupe à un autre) : il faut retirer puis réimporter.
+- Correction du nom d'un étudiant : bouton **« Modifier »** dans la liste du
+  groupe (admin). La correction est journalisée (ancien et nouveau nom).
+- Pas encore de renommage de groupe ni de déplacement d'un étudiant d'un
+  groupe à un autre : il faut retirer, puis réimporter.
 - Les jours fériés et vacances ne sont pas exclus automatiquement de la
   planification hebdomadaire : annulez les séances concernées.
 - Un étudiant peut être inscrit dans deux groupes d'une même section (pas de

@@ -3,14 +3,27 @@
 import { useState, useTransition } from "react";
 import type { StudentListResult } from "@/lib/import/student-list";
 import { FormMessage } from "@/components/FormMessage";
-import { confirmImport, previewImport, type ImportSummary } from "../../actions";
+import { applyFileNames, confirmImport, previewImport, type ImportSummary } from "../../actions";
 
 // Importation en deux étapes : 1) vérification du fichier (aperçu, erreurs),
 // 2) confirmation. Rien n'est enregistré avant la confirmation.
-export function ImportStudents({ groupId, groupName }: { groupId: string; groupName: string }) {
+export function ImportStudents({
+  groupId,
+  groupName,
+  institutionId,
+  canEditNames,
+}: {
+  groupId: string;
+  groupName: string;
+  institutionId: string;
+  canEditNames: boolean;
+}) {
   const [preview, setPreview] = useState<StudentListResult | null>(null);
   const [summary, setSummary] = useState<ImportSummary | null>(null);
   const [networkError, setNetworkError] = useState("");
+  // Lignes envoyées au dernier import (pour corriger les noms signalés).
+  const [lastRows, setLastRows] = useState<{ matricule: string; nom: string; prenom: string }[]>([]);
+  const [fixResult, setFixResult] = useState<{ error?: string; updated?: number } | null>(null);
   const [pending, startTransition] = useTransition();
 
   function onPreview(event: React.FormEvent<HTMLFormElement>) {
@@ -34,9 +47,23 @@ export function ImportStudents({ groupId, groupName }: { groupId: string; groupN
       try {
         const result = await confirmImport(groupId, rows);
         setSummary(result);
+        setLastRows(rows);
+        setFixResult(null);
         if (!result.error) setPreview(null);
       } catch {
         setNetworkError("Envoi impossible. Vérifiez votre connexion et réessayez : rien n'a été enregistré.");
+      }
+    });
+  }
+
+  function onApplyNames() {
+    const mismatched = new Set((summary?.noms_differents ?? []).map((d) => d.matricule));
+    const rows = lastRows.filter((r) => mismatched.has(r.matricule));
+    startTransition(async () => {
+      try {
+        setFixResult(await applyFileNames(institutionId, rows));
+      } catch {
+        setFixResult({ error: "Envoi impossible. Vérifiez votre connexion et réessayez." });
       }
     });
   }
@@ -138,6 +165,17 @@ export function ImportStudents({ groupId, groupName }: { groupId: string; groupN
                     </li>
                   ))}
                 </ul>
+                {canEditNames && !fixResult?.updated && (
+                  <button type="button" onClick={onApplyNames} disabled={pending}>
+                    {pending ? "Correction…" : `Remplacer par les noms du fichier (${summary.noms_differents.length})`}
+                  </button>
+                )}
+                {fixResult?.updated ? (
+                  <p role="status" className="form-success">
+                    {fixResult.updated} nom(s) corrigé(s).
+                  </p>
+                ) : null}
+                <FormMessage error={fixResult?.error} />
               </div>
             )}
           </div>

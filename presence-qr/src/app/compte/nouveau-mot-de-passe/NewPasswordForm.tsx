@@ -43,8 +43,10 @@ export function NewPasswordForm() {
     }
   }
 
+  // method="post" : si la page n'est pas encore chargée (réseau lent), un envoi
+  // « classique » du formulaire ne met jamais le mot de passe dans l'adresse.
   return (
-    <form onSubmit={onSubmit} className="form" noValidate>
+    <form onSubmit={onSubmit} className="form" method="post" noValidate>
       <label>
         Nouveau mot de passe
         <input name="password" type="password" autoComplete="new-password" required minLength={10} aria-describedby="password-hint" />
