@@ -159,3 +159,22 @@ feuille d'émargement imprimable) en parallèle, puis comparez les deux.
   vrai service d'envoi avant d'ouvrir la plateforme à des collègues.
 - La purge automatique des données temporaires (au-delà de 30 jours) sera
   programmée plus tard (phase 7).
+
+---
+
+## Mises à jour qui modifient la base de données
+
+Certaines mises à jour demandent d'exécuter un petit script SQL dans Supabase.
+**Toujours dans cet ordre** :
+1. Supabase → **SQL Editor** → **New query** → coller le script indiqué →
+   **Run** (résultat attendu : « Success »). Chaque script ne s'exécute
+   **qu'une seule fois**.
+2. Ensuite, fusionner la Pull Request sur GitHub.
+
+| Date | Script (dans `presence-qr/supabase/deploy/`) | Ce qu'il ajoute |
+|---|---|---|
+| 18/10/2026 | `maj-2026-10-18-annulation-seance.sql` | Annuler une séance déjà ouverte ou clôturée (essai, erreur) |
+
+Pour une **installation neuve**, `schema-complet.sql` contient déjà toutes
+les mises à jour.
+

@@ -9,7 +9,8 @@ import { getInstitutionContext } from "@/lib/institution";
 import { formatDateTime } from "@/lib/dates";
 import { SESSION_STATUS_LABELS, SESSION_TYPE_LABELS } from "@/lib/labels";
 import { fetchRoster } from "@/lib/roster";
-import { openSession } from "../actions";
+import { discardSession, openSession } from "../actions";
+import { Collapsible } from "@/components/Collapsible";
 import { LiveSession } from "./LiveSession";
 
 export const metadata: Metadata = { title: "Séance — Présence QR" };
@@ -69,7 +70,9 @@ export default async function SessionPage({ params }: PageProps<"/espace/[instit
           />
         </div>
       )}
-      {session.status === "cancelled" && <p className="muted">Cette séance a été annulée.</p>}
+      {session.status === "cancelled" && (
+        <p className="muted">Cette séance a été annulée : elle n&apos;est comptée ni dans l&apos;historique ni dans les exports.</p>
+      )}
 
       {(session.status === "open" || session.status === "closed") && (
         <LiveSession
@@ -89,6 +92,29 @@ export default async function SessionPage({ params }: PageProps<"/espace/[instit
           sheetUrl={`/espace/${institution.id}/seances/${session.id}/feuille`}
           siteHost={siteHost}
         />
+      )}
+      {isOwner && session.status !== "cancelled" && (
+        <Collapsible summary="Annuler cette séance (essai ou erreur)">
+          <p className="muted small">
+            La séance ne sera plus comptée dans l&apos;historique, les absences ni les exports. Les pointages déjà
+            enregistrés restent conservés dans le journal, avec votre justification.
+          </p>
+          <ActionForm
+            action={discardSession.bind(null, session.id)}
+            submitLabel="Annuler définitivement cette séance"
+            confirmMessage="Annuler cette séance ? Elle ne sera plus comptée."
+            buttonClassName="danger-button"
+          >
+            <input
+              name="reason"
+              required
+              minLength={3}
+              maxLength={500}
+              aria-label="Justification de l'annulation"
+              placeholder="Justification (ex. séance d'essai)"
+            />
+          </ActionForm>
+        </Collapsible>
       )}
     </main>
   );

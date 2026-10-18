@@ -59,7 +59,15 @@
 | `npm run test:e2e` (dont le parcours historique + téléchargements relus) | 14/14 ✅ |
 | `npm run check:secrets`, `npm audit --omit=dev` | OK, 0 vulnérabilité |
 
-## 5. Limites
+## 5. Séances d'essai ou erronées
+
+Une séance ouverte ou clôturée par erreur (essai, mauvais groupe) peut être
+**annulée** depuis sa page : « Annuler cette séance (essai ou erreur) », avec
+une justification obligatoire. Elle n'est alors plus comptée dans
+l'historique, les absences ni les exports. Les pointages restent conservés
+dans le journal d'audit (aucune suppression physique).
+
+## 6. Limites
 
 - Le seuil (3) est fixé pour tout l'établissement. Il n'est pas encore
   réglable depuis l'interface.

@@ -313,6 +313,7 @@ describe("pointage étudiant : fonctions réservées au serveur", () => {
     expect((await bob.client.rpc("open_session", { p_session_id: sessionA, p_minutes: 15 })).error?.code).toBe("42501");
     expect((await bob.client.rpc("rotate_session_token", { p_session_id: sessionA })).error?.code).toBe("42501");
     expect((await bob.client.rpc("close_session", { p_session_id: sessionA })).error?.code).toBe("42501");
+    expect((await bob.client.rpc("discard_session", { p_session_id: sessionA, p_reason: "Tentative croisée" })).error?.code).toBe("42501");
     expect(
       (
         await bob.client.rpc("set_attendance", {

@@ -672,6 +672,10 @@ export type Database = {
       cancel_session: { Args: { p_session_id: string }; Returns: undefined };
       close_session: { Args: { p_session_id: string }; Returns: Json };
       create_workspace: { Args: { p_name: string }; Returns: string };
+      discard_session: {
+        Args: { p_reason: string; p_session_id: string };
+        Returns: undefined;
+      };
       extend_checkin: {
         Args: { p_minutes?: number; p_session_id: string };
         Returns: string;
