@@ -228,22 +228,69 @@ export async function applyFileNames(institutionId: string, rows: unknown): Prom
   return { updated };
 }
 
-const studentNameSchema = z.object({
+const matriculeField = z
+  .string()
+  .transform((v) => v.replace(/\s+/g, "").toUpperCase())
+  .pipe(z.string().regex(MATRICULE_PATTERN, "Matricule invalide (lettres, chiffres, . / _ -, 3 à 30 caractères)."));
+
+const studentSchema = z.object({
+  matricule: matriculeField,
   last_name: text(1, 100, "Nom"),
   first_name: text(1, 100, "Prénom"),
 });
 
-/** Correction manuelle du nom d'un étudiant (admin ; journalisée par l'audit). */
+/**
+ * Correction manuelle d'un étudiant : matricule, nom, prénom (admin ;
+ * journalisée par l'audit). L'historique de présence est conservé, car il
+ * est rattaché à l'étudiant et non au matricule.
+ */
 export async function renameStudent(studentId: string, _: FormState, fd: FormData): Promise<FormState> {
-  const parsed = studentNameSchema.safeParse({ last_name: fd.get("last_name"), first_name: fd.get("first_name") });
+  const parsed = studentSchema.safeParse({
+    matricule: fd.get("matricule") ?? "",
+    last_name: fd.get("last_name"),
+    first_name: fd.get("first_name"),
+  });
   if (!parsed.success) return invalid(parsed.error);
   if (!uuid.safeParse(studentId).success) return { error: "Identifiant invalide." };
   const { supabase } = await requireUser();
   const { data, error } = await supabase.from("students").update(parsed.data).eq("id", studentId).select("id");
-  if (error) return { error: dbErrorMessage(error) };
-  if (!data?.length) return { error: "Action non autorisée : seule l'administratrice peut corriger les noms." };
+  if (error) {
+    return { error: dbErrorMessage(error, { duplicate: "Ce matricule est déjà attribué à un autre étudiant." }) };
+  }
+  if (!data?.length) return { error: "Action non autorisée : seule l'administratrice peut modifier un étudiant." };
   refresh();
-  return { success: "Nom corrigé." };
+  return { success: "Étudiant modifié." };
+}
+
+/**
+ * Ajout manuel d'un étudiant dans un groupe (sans fichier). Passe par la même
+ * fonction SQL que l'import : droits vérifiés en base, matricule existant
+ * réutilisé (sans écraser son nom).
+ */
+export async function addStudentToGroup(groupId: string, _: FormState, fd: FormData): Promise<FormState> {
+  const parsed = studentSchema.safeParse({
+    matricule: fd.get("matricule") ?? "",
+    last_name: fd.get("last_name"),
+    first_name: fd.get("first_name"),
+  });
+  if (!parsed.success) return invalid(parsed.error);
+  if (!uuid.safeParse(groupId).success) return { error: "Identifiant invalide." };
+  const { supabase } = await requireUser();
+  const { data, error } = await supabase.rpc("import_students", {
+    p_group_id: groupId,
+    p_rows: [{ matricule: parsed.data.matricule, nom: parsed.data.last_name, prenom: parsed.data.first_name }],
+  });
+  if (error) return { error: dbErrorMessage(error) };
+  const r = data as ImportSummary;
+  refresh();
+  if (r.deja_presents) return { error: `Le matricule ${parsed.data.matricule} est déjà dans ce groupe.` };
+  if (r.noms_differents?.length) {
+    const d = r.noms_differents[0];
+    return {
+      success: `Ajouté au groupe. Attention : ce matricule existait déjà sous le nom « ${d.enregistre} » (conservé ; utilisez « Modifier » pour le corriger).`,
+    };
+  }
+  return { success: `${parsed.data.last_name} ${parsed.data.first_name} ajouté(e) au groupe.` };
 }
 
 // -----------------------------------------------------------------------------

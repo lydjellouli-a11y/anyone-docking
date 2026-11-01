@@ -6,7 +6,7 @@ import { ActionForm } from "@/components/ActionForm";
 import { Collapsible } from "@/components/Collapsible";
 import { getInstitutionContext } from "@/lib/institution";
 import { fetchRoster } from "@/lib/roster";
-import { deleteGroup, removeStudentFromGroup, renameStudent } from "../../actions";
+import { addStudentToGroup, deleteGroup, removeStudentFromGroup, renameStudent } from "../../actions";
 import { ImportStudents } from "./ImportStudents";
 
 export const metadata: Metadata = { title: "Liste du groupe — Présence QR" };
@@ -76,6 +76,25 @@ export default async function GroupPage({ params }: PageProps<"/espace/[institut
         <ImportStudents groupId={group.id} groupName={group.name} institutionId={institution.id} canEditNames={isAdmin} />
       )}
 
+      {canImport && (
+        <Collapsible summary="Ajouter un étudiant (sans fichier)">
+          <ActionForm action={addStudentToGroup.bind(null, group.id)} submitLabel="Ajouter l'étudiant">
+            <label>
+              Matricule
+              <input name="matricule" required maxLength={40} autoComplete="off" />
+            </label>
+            <label>
+              Nom
+              <input name="last_name" required maxLength={100} autoComplete="off" />
+            </label>
+            <label>
+              Prénom
+              <input name="first_name" required maxLength={100} autoComplete="off" />
+            </label>
+          </ActionForm>
+        </Collapsible>
+      )}
+
       <h2>Liste des étudiants ({roster.length})</h2>
       {roster.length === 0 ? (
         <p className="muted">Aucun étudiant pour l&apos;instant.</p>
@@ -103,6 +122,7 @@ export default async function GroupPage({ params }: PageProps<"/espace/[institut
                       <details>
                         <summary className="small">Modifier</summary>
                         <ActionForm action={renameStudent.bind(null, s.id)} submitLabel="Enregistrer" className="form compact">
+                          <input name="matricule" defaultValue={s.matricule} required maxLength={40} aria-label="Matricule" />
                           <input name="last_name" defaultValue={s.last_name} required maxLength={100} aria-label="Nom" />
                           <input name="first_name" defaultValue={s.first_name} required maxLength={100} aria-label="Prénom" />
                         </ActionForm>
